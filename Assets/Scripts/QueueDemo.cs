@@ -5,15 +5,22 @@ using TMPro;
 
 public class QueueDemo : MonoBehaviour
 {
+    // add visual for enemy and boss
+    
+    public GameObject EnemyPrefab;
+    public GameObject BossPrefab;
+    public Transform SpawnPoint; // Vị trí xuất hiện
+    // valuation spawn
     public float SpawnFrequency = 2f;
     private float _lastSpawnTime = 0f;
     private bool _isSpawning;
-    private Queue<string> _queue = new();
-
+    public List<string> InitialQueue = new(); // Hiển thị trong Inspector
+    private Queue<string> _queue = new();     // Dùng trong logic game
+    // button declaration
     public Button Enqueue;
     public Button StartToSpawning;
     public Button Pause;
-
+    // tmp
     public TMP_Text NormalEnemyNameNotice;
     public TMP_Text BossComingNotice;
     public TMP_Text QueueStatusText;
@@ -21,8 +28,11 @@ public class QueueDemo : MonoBehaviour
 
     void Start()
     {
-        List<string> wave = new() { "Enemy", "Enemy", "Boss", "Enemy" };
-        GetComponent<QueueDemo>().AddQueue(wave);
+        foreach (string npc in InitialQueue)
+        {
+            _queue.Enqueue(npc);
+        }
+        UpdateQueueUI(); // Cập nhật UI ban đầu
     }
     void Update()
     {
@@ -42,13 +52,23 @@ public class QueueDemo : MonoBehaviour
                 BossComingNotice.text = "⚠️ Boss is coming!";
                 NormalEnemyNameNotice.text = "";
                 Debug.Log("Boss is coming");
+                GameObject spawnedBoss = Instantiate(BossPrefab, SpawnPoint.position, Quaternion.identity);
+                spawnedBoss.transform.SetAsLastSibling(); // Hiển thị trên cùng
+                Destroy(spawnedBoss, SpawnFrequency); // Hủy sau SpawnFrequency giây
+
             }
             else
             {
                 NormalEnemyNameNotice.text = $"Spawned: {npc}";
                 BossComingNotice.text = "";
                 Debug.Log($"Spawned: {npc}");
+                GameObject spawnedEnemy = Instantiate(EnemyPrefab, SpawnPoint.position, Quaternion.identity);
+                spawnedEnemy.transform.SetSiblingIndex(0); // Hiển thị phía sau
+                Destroy(spawnedEnemy, SpawnFrequency); // Hủy sau SpawnFrequency giây
+
+
             }
+
 
             UpdateQueueUI(); // Cập nhật sau khi dequeue
         }
